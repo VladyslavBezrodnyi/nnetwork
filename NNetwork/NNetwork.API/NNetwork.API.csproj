@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NNetwork.Application\NNetwork.Application.csproj" />
     <ProjectReference Include="..\NNetwork.Domain\NNetwork.Domain.csproj" />
+    <ProjectReference Include="..\NNetwork.Infrastructure\NNetwork.Infrastructure.csproj" />
   </ItemGroup>
 
 

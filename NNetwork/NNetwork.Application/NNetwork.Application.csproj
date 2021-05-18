@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\" />
+    <ProjectReference Include="..\NNetwork.Domain\NNetwork.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NNetwork.Domain\NNetwork.Domain.csproj" />
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>
