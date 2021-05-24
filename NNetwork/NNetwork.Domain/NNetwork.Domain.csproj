@@ -10,4 +10,8 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NNetwork.KerasApplication\NNetwork.KerasApplication.csproj" />
+  </ItemGroup>
+
 </Project>

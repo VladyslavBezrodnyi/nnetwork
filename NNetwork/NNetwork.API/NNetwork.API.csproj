@@ -8,6 +8,7 @@
     <ProjectReference Include="..\NNetwork.Application\NNetwork.Application.csproj" />
     <ProjectReference Include="..\NNetwork.Domain\NNetwork.Domain.csproj" />
     <ProjectReference Include="..\NNetwork.Infrastructure\NNetwork.Infrastructure.csproj" />
+    <ProjectReference Include="..\NNetwork.KerasApplication\NNetwork.KerasApplication.csproj" />
   </ItemGroup>
 
 

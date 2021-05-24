@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\NNetwork.Domain\NNetwork.Domain.csproj" />
+    <ProjectReference Include="..\NNetwork.KerasApplication\NNetwork.KerasApplication.csproj" />
   </ItemGroup>
 
 </Project>
