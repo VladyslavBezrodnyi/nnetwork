@@ -1,15 +1,18 @@
 ﻿using Keras;
 using Keras.Layers;
 using Keras.Models;
+using Keras.Optimizers;
 using NNetwork.KerasApplication.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NNetwork.KerasApplication.Networks
 {
     public class Network
     {
         private BaseLayer[] Layers { get; set; }
+        private Model Model { get; set; }
 
         public bool InitializeNetwork(NetworkInitializationModel initializer)
         {
@@ -21,35 +24,39 @@ namespace NNetwork.KerasApplication.Networks
             int index = 0;
             foreach (var layer in initializer.Layers)
             {
-                var createdLayer = CreateLayer(layer.LayerType, layer.Parameters);
+                var inputs = layer.Transitions.Select(id => Layers[id]);
+                BaseLayer createdLayer = null;
+                if(layer.LayerType == LayerType.Concatenate)
+                {
+                    createdLayer = new Concatenate(inputs.ToArray());
+                } else {
+                    createdLayer = CreateLayer(layer.LayerType, layer.Parameters);
+                    createdLayer = createdLayer.Set(inputs.ToArray());
+                }
                 
                 Layers[index] = createdLayer;
                 index++;
             }
 
-            foreach (var layer in initializer.Layers)
-            {
-                if (layer.Transitions == null)
-                {
-                    continue;
-                }
-                foreach (var transition in layer.Transitions)
-                {
-
-                }
-            }
-
+            Model = new Model(Layers[0], Layers[^1]);
             return true;
         }
 
-        public Model InitializeModel(NetworkInitializationModel initializer)
+        public void Compile(
+            StringOrInstance optimizer,
+            string loss,
+            string[]  metrics)
         {
-            if (Layers == null || Layers.Length == 0)
-            {
-                return null;
-            }
-            var model = new Model(Layers[0], Layers[^1]);
-            return model;
+            Model.Compile(
+                optimizer ?? new Adadelta(), 
+                loss ?? "categorical_crossentropy", 
+                metrics ?? new string[] { "accuracy" }
+                );
+
+        }
+
+        public void Fit()
+        {
         }
 
         private static BaseLayer CreateLayer(LayerType type, Dictionary<string, object> parameters)
@@ -76,9 +83,6 @@ namespace NNetwork.KerasApplication.Networks
                     ),
                 LayerType.UpSampling2D => new UpSampling2D(
                     size: (Tuple<int, int>)parameters["size"]
-                    ),
-                LayerType.Concatenate => new Concatenate(
-                    inputs: (BaseLayer[])parameters["inputs"]
                     ),
                 LayerType.LeakyReLU => new LeakyReLU(
                     alpha: (float)parameters["alpha"]
