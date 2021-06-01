@@ -2,9 +2,11 @@
 using Keras.Layers;
 using Keras.Models;
 using Keras.Optimizers;
+using NNetwork.KerasApplication.Arguments;
 using NNetwork.KerasApplication.Enums;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NNetwork.KerasApplication.Networks
@@ -12,7 +14,7 @@ namespace NNetwork.KerasApplication.Networks
     public class Network
     {
         private BaseLayer[] Layers { get; set; }
-        private Model Model { get; set; }
+        private Model _model { get; set; }
 
         public bool InitializeNetwork(NetworkInitializationModel initializer)
         {
@@ -38,25 +40,71 @@ namespace NNetwork.KerasApplication.Networks
                 index++;
             }
 
-            Model = new Model(Layers[0], Layers[^1]);
+            _model = new Model(Layers[0], Layers[^1]);
+            return true;
+        }
+
+        public bool InitializeNetwork(string jsonModel, byte[] weightFileByteArray)
+        {
+            var loaded_model = Model.ModelFromJson(jsonModel);
+
+            var weightFileName = Guid.NewGuid().ToString() + ".h5";
+            File.WriteAllBytes(weightFileName, weightFileByteArray);
+            loaded_model.LoadWeight(weightFileName);
+            File.Delete(weightFileName);
+
+            _model = (Model)loaded_model;
             return true;
         }
 
         public void Compile(
-            StringOrInstance optimizer,
+            string optimizer,
             string loss,
             string[]  metrics)
         {
-            Model.Compile(
-                optimizer ?? new Adadelta(), 
+            _model.Compile(
+                (StringOrInstance)optimizer ?? new Adadelta(), 
                 loss ?? "categorical_crossentropy", 
                 metrics ?? new string[] { "accuracy" }
                 );
 
         }
 
+        public (string, byte[]) Save()
+        {
+            string jsonModel = _model.ToJson();
+            var weightFileName = Guid.NewGuid().ToString() + ".h5";
+            _model.SaveWeight(weightFileName);
+            var weightFileByteArray = File.ReadAllBytes(weightFileName);
+            File.Delete(weightFileName);
+            return (jsonModel, weightFileByteArray);
+        }
+
         public void Fit()
         {
+            //_model.Fit(x, y, batch_size: 2, epochs: 1000, verbose: 1);
+        }
+
+        public byte[] GetPlot()
+        {
+            var fileName = Guid.NewGuid().ToString() + ".png";
+            Keras.Utils.Util.PlotModel(
+                _model,
+                to_file: fileName,
+                show_shapes: true,
+                show_layer_names: true,
+                rankdir: "TB",
+                expand_nested: true,
+                dpi: 96
+                );
+            var fileByteArray = File.ReadAllBytes(fileName);
+            File.Delete(fileName);
+            return fileByteArray;
+        }
+
+        public void Predict()
+        {
+            //_model.Predict();
         }
 
         private static BaseLayer CreateLayer(LayerType type, Dictionary<string, object> parameters)

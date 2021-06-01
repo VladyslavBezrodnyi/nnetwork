@@ -10,6 +10,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NNetwork.API.Hubs;
+using NNetwork.Application.Services;
+using NNetwork.Domain.Services;
 
 namespace NNetwork
 {
@@ -26,6 +29,9 @@ namespace NNetwork
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddSignalR();
+
+            services.AddScoped<INetworkService, NetworkService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,6 +51,7 @@ namespace NNetwork
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<NetworkHub>("/network");
             });
         }
     }

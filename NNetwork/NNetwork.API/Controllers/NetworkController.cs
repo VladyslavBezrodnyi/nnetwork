@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NNetwork.API.Dtos;
+using NNetwork.Domain.Services;
 
 namespace NNetwork.API.Controllers
 {
@@ -14,10 +15,13 @@ namespace NNetwork.API.Controllers
     public class NetworkController : ControllerBase
     {
         private readonly ILogger<NetworkController> _logger;
+        private readonly INetworkService _networkService;
 
-        public NetworkController(ILogger<NetworkController> logger)
+        public NetworkController(ILogger<NetworkController> logger,
+        INetworkService networkService)
         {
             _logger = logger;
+            _networkService = networkService;
         }
 
         [HttpPost]

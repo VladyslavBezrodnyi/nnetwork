@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNetwork.Application", "NNe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNetwork.KerasApplication", "NNetwork.KerasApplication\NNetwork.KerasApplication.csproj", "{33FFEED8-696E-45A1-A5EC-0E58B62CC277}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNetwork.Console", "NNetwork.Console\NNetwork.Console.csproj", "{0F0B12DC-E7AE-49C0-B84C-FB7E93AC5594}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{33FFEED8-696E-45A1-A5EC-0E58B62CC277}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33FFEED8-696E-45A1-A5EC-0E58B62CC277}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33FFEED8-696E-45A1-A5EC-0E58B62CC277}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F0B12DC-E7AE-49C0-B84C-FB7E93AC5594}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F0B12DC-E7AE-49C0-B84C-FB7E93AC5594}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F0B12DC-E7AE-49C0-B84C-FB7E93AC5594}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F0B12DC-E7AE-49C0-B84C-FB7E93AC5594}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
