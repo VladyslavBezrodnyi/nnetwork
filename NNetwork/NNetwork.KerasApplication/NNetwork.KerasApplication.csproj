@@ -8,8 +8,4 @@
     <PackageReference Include="Keras.NET" Version="3.8.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Arguments\" />
-  </ItemGroup>
-
 </Project>

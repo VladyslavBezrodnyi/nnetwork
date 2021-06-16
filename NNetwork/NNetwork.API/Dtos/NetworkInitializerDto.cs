@@ -1,6 +1,6 @@
 ﻿namespace NNetwork.API.Dtos
 {
-    public class NetworkInitializerDto
+    public class NetworkInitializerDto: NetworkBaseDto
     {
         public LayerDto[] Layers { get; set; }
     }

@@ -5,8 +5,9 @@ namespace NNetwork.API.Dtos
 {
     public class LayerDto
     {
+        public long Id { get; set; }
         public LayerType LayerType { get; set; }
-        public Dictionary<string, string> Parameters { get; set; }
+        public ParametersDto Parameters { get; set; }
         public List<int> Transitions { get; set; }
     }
 }

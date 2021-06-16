@@ -7,6 +7,8 @@ namespace NNetwork.KerasApplication.Networks
 {
     public class NetworkInitializationModel
     {
+        public string Title { get; set; }
+        public string Description { get; set; }
         public Layer[] Layers { get; set; }
     }
 }

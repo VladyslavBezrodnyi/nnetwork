@@ -1,6 +1,8 @@
-﻿using System;
+﻿using NNetwork.Domain.Models;
+using NNetwork.KerasApplication.Networks;
+using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace NNetwork.Domain.Repositories
 {

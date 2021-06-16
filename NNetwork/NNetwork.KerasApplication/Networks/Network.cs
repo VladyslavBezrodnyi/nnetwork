@@ -1,9 +1,11 @@
 ﻿using Keras;
+using Keras.Callbacks;
 using Keras.Layers;
 using Keras.Models;
 using Keras.Optimizers;
 using NNetwork.KerasApplication.Arguments;
 using NNetwork.KerasApplication.Enums;
+using Numpy;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +16,7 @@ namespace NNetwork.KerasApplication.Networks
     public class Network
     {
         private BaseLayer[] Layers { get; set; }
-        private Model _model { get; set; }
+        public  BaseModel NetworkModel { get; set; }
 
         public bool InitializeNetwork(NetworkInitializationModel initializer)
         {
@@ -22,25 +24,35 @@ namespace NNetwork.KerasApplication.Networks
             {
                 return false;
             }
+
             Layers = new BaseLayer[initializer.Layers.Length];
             int index = 0;
             foreach (var layer in initializer.Layers)
             {
-                var inputs = layer.Transitions.Select(id => Layers[id]);
+                var inputs = layer.Transitions.Select(id => Layers[id]).ToList();
                 BaseLayer createdLayer = null;
-                if(layer.LayerType == LayerType.Concatenate)
+                if (layer.LayerType == LayerType.Concatenate)
                 {
                     createdLayer = new Concatenate(inputs.ToArray());
-                } else {
-                    createdLayer = CreateLayer(layer.LayerType, layer.Parameters);
-                    createdLayer = createdLayer.Set(inputs.ToArray());
                 }
-                
+                else
+                {
+                    createdLayer = LayerCreator.CreateLayer(layer.LayerType, layer.Parameters);
+                    if (inputs.Count() == 1)
+                    {
+                        createdLayer = createdLayer.Set(inputs.ToArray());
+                    }
+                    else if (inputs.Count() > 1)
+                    {
+                        createdLayer = createdLayer.Set(new Concatenate(inputs.ToArray()));
+                    }
+                }
+
                 Layers[index] = createdLayer;
                 index++;
             }
 
-            _model = new Model(Layers[0], Layers[^1]);
+            NetworkModel = new Keras.Models.Model(new Input[] { (Input)Layers[0] }, new BaseLayer[] { Layers[^1] });
             return true;
         }
 
@@ -53,43 +65,56 @@ namespace NNetwork.KerasApplication.Networks
             loaded_model.LoadWeight(weightFileName);
             File.Delete(weightFileName);
 
-            _model = (Model)loaded_model;
+            NetworkModel = loaded_model;
             return true;
         }
 
         public void Compile(
-            string optimizer,
-            string loss,
-            string[]  metrics)
+            StringOrInstance optimizer = null,
+            string loss = null,
+            string[] metrics = null)
         {
-            _model.Compile(
-                (StringOrInstance)optimizer ?? new Adadelta(), 
-                loss ?? "categorical_crossentropy", 
-                metrics ?? new string[] { "accuracy" }
+            NetworkModel.Compile(
+                optimizer: (StringOrInstance)optimizer ?? new RMSprop(lr: 0.0001f, decay: 1e-6f),
+                loss : loss ?? "categorical_crossentropy",
+                metrics : metrics ?? new string[] { "accuracy" }
                 );
 
         }
 
         public (string, byte[]) Save()
         {
-            string jsonModel = _model.ToJson();
+            string jsonModel = NetworkModel.ToJson();
             var weightFileName = Guid.NewGuid().ToString() + ".h5";
-            _model.SaveWeight(weightFileName);
+            NetworkModel.SaveWeight(weightFileName);
             var weightFileByteArray = File.ReadAllBytes(weightFileName);
             File.Delete(weightFileName);
             return (jsonModel, weightFileByteArray);
         }
 
-        public void Fit()
+        public History Fit(NDarray x_train,
+            NDarray y_train,
+            int batch_size,
+            int epochs,
+            NDarray[] validation_data,
+            bool shuffle)
         {
-            //_model.Fit(x, y, batch_size: 2, epochs: 1000, verbose: 1);
+            return NetworkModel.Fit(
+                x_train,
+                y_train,
+                batch_size: batch_size,
+                epochs: epochs,
+                verbose: 1,
+                validation_data: validation_data,
+                shuffle: shuffle
+                );
         }
 
         public byte[] GetPlot()
         {
             var fileName = Guid.NewGuid().ToString() + ".png";
             Keras.Utils.Util.PlotModel(
-                _model,
+                NetworkModel,
                 to_file: fileName,
                 show_shapes: true,
                 show_layer_names: true,
@@ -102,49 +127,9 @@ namespace NNetwork.KerasApplication.Networks
             return fileByteArray;
         }
 
-        public void Predict()
+        public NDarray Predict(NDarray x)
         {
-            //_model.Predict();
-        }
-
-        private static BaseLayer CreateLayer(LayerType type, Dictionary<string, object> parameters)
-        {
-            return type switch
-            {
-                LayerType.Activation => new Activation(act: (string)parameters["act"]),
-                LayerType.Conv2D => new Conv2D(
-                    filters: (int)parameters["filters"],
-                    kernel_size: (Tuple<int, int>)parameters["kernel_size"]
-                    ),
-                LayerType.Dense => new Dense(
-                    units: (int)parameters["units"]
-                    ),
-                LayerType.Dropout => new Dropout(
-                    rate: (double)parameters["rate"]
-                    ),
-                LayerType.Flatten => new Flatten(),
-                LayerType.Input => new Input(
-                    shape: ((int, int, int))parameters["shape"]
-                    ),
-                LayerType.MaxPooling2D => new MaxPooling2D(
-                    pool_size: (Tuple<int, int>)parameters["pool_size"]
-                    ),
-                LayerType.UpSampling2D => new UpSampling2D(
-                    size: (Tuple<int, int>)parameters["size"]
-                    ),
-                LayerType.LeakyReLU => new LeakyReLU(
-                    alpha: (float)parameters["alpha"]
-                    ),
-                LayerType.PReLU => new PReLU(),
-                LayerType.ReLU => new ReLU(),
-                LayerType.ELU => new ELU(
-                    alpha: (float)parameters["alpha"]
-                    ),
-                LayerType.Softmax => new Softmax(
-                    axis: (int)parameters["axis"]
-                    ),
-                _ => null,
-            };
+            return NetworkModel.Predict(x);
         }
     }
 }
